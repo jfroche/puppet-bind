@@ -29,6 +29,10 @@ define bind::zone (
     $bind_group = $::bind::defaults::bind_group
 
     $_domain = pick($domain, $name)
+    $zone_file = $_domain ? {
+        '.'     => 'root',
+        default => $_domain
+    }
 
     unless !($masters != '' and ! member(['slave', 'stub'], $zone_type)) {
         fail("masters may only be provided for bind::zone resources with zone_type 'slave' or 'stub'")
@@ -87,7 +91,7 @@ define bind::zone (
         }
 
         if member(['init', 'managed'], $zone_file_mode) {
-            file { "${cachedir}/${name}/${_domain}":
+            file { "${cachedir}/${name}/${zone_file}":
                 ensure  => present,
                 owner   => $bind_user,
                 group   => $bind_group,
@@ -104,7 +108,7 @@ define bind::zone (
                 user        => $bind_user,
                 refreshonly => true,
                 require     => Service['bind'],
-                subscribe   => File["${cachedir}/${name}/${_domain}"],
+                subscribe   => File["${cachedir}/${name}/${zone_file}"],
             }
         }
     } elsif $zone_file_mode == 'absent' {
@@ -119,15 +123,15 @@ define bind::zone (
                 '${_domain}' '${key_directory}' '${random_device}' '${nsec3_salt}'",
             cwd     => $cachedir,
             user    => $bind_user,
-            creates => "${cachedir}/${name}/${_domain}.signed",
+            creates => "${cachedir}/${name}/${zone_file}.signed",
             timeout => 0, # crypto is hard
             require => [
                 File['/usr/local/bin/dnssec-init'],
-                File["${cachedir}/${name}/${_domain}"]
+                File["${cachedir}/${name}/${zone_file}"]
             ],
         }
 
-        file { "${cachedir}/${name}/${_domain}.signed":
+        file { "${cachedir}/${name}/${zone_file}.signed":
             owner => $bind_user,
             group => $bind_group,
             mode  => '0644',
