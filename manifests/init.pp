@@ -19,7 +19,7 @@ class bind (
         notify  => Service['bind'],
     }
 
-    package{'bind-tools':
+    package { 'bind-tools':
         ensure => latest,
         name   => $nsupdate_package,
         before => Package['bind'],
@@ -58,6 +58,12 @@ class bind (
 
     file { $namedconf:
         content => template('bind/named.conf.erb'),
+    }
+
+    if $default_zones_source {
+        file { $default_zones_include:
+            source => $default_zones_source,
+        }
     }
 
     class { 'bind::keydir':
