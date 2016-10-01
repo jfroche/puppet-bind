@@ -9,6 +9,7 @@ class bind (
     $statistics_port = undef,
     $auth_nxdomain   = false,
     $include_local   = false,
+    $listen_ipv6     = true,
 ) inherits bind::defaults {
 
     File {

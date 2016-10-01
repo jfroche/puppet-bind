@@ -22,10 +22,12 @@ options {
 	};
 <%- end -%>
 	auth-nxdomain <%= @auth_nxdomain ? 'yes' : 'no' %>;
-	listen-on-v6 { any; };
 	dnssec-enable <%= @dnssec ? 'yes' : 'no' %>;
 <%- if @filter_ipv6 -%>
 	filter-aaaa-on-v4 yes;
+<%- end -%>
+<%- if @listen_ipv6 -%>
+	listen-on-v6 { any; };
 <%- end -%>
 <%- if @dnssec -%>
 	dnssec-validation yes;
